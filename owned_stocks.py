@@ -230,25 +230,25 @@ class OwnedStocksManager:
 
             stocks = session.query(OwnedStock).filter_by(userid=current_user_id).all()
 
-            if not stocks:
+            # if not stocks:
+            #     no_owned_stocks_label = ctk.CTkLabel(self.owned_stocks_frame, text="No stocks found", font=("Arial", 14))
+            #     no_owned_stocks_label.pack(pady=20)
+            # else:
+            stocks_count = 0
+            for stock in stocks:
+                stock_data = (
+                    stock.stockid,
+                    stock.stock_ticker,
+                    stock.date_purchased,
+                    stock.amount_invested,
+                    stock.number_of_shares
+                )
+                self.create_owned_stock_frame(self.owned_stocks_frame, stock_data)
+                stocks_count += 1
+
+            if stocks_count == 0:
                 no_owned_stocks_label = ctk.CTkLabel(self.owned_stocks_frame, text="No stocks found", font=("Arial", 14))
                 no_owned_stocks_label.pack(pady=20)
-            else:
-                stocks_count = 0
-                for stock in stocks:
-                    stock_data = (
-                        stock.stockid,
-                        stock.stock_ticker,
-                        stock.date_purchased,
-                        stock.amount_invested,
-                        stock.number_of_shares
-                    )
-                    self.create_owned_stock_frame(self.owned_stocks_frame, stock_data)
-                    stocks_count += 1
-
-                if stocks_count == 0:
-                    no_owned_stocks_label = ctk.CTkLabel(self.owned_stocks_frame, text="No stocks found", font=("Arial", 14))
-                    no_owned_stocks_label.pack(pady=20)
 
         except SQLAlchemyError as e:
             messagebox.showerror("Database Error", f"Failed to retrieve stocks: {str(e)}")
