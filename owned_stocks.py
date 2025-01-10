@@ -18,6 +18,7 @@ class OwnedStocksManager:
     def __init__(self, home, homeroot, current_username):
         self.root = ctk.CTk()
         self.homeroot = homeroot
+        homeroot.withdraw()
         self.home = home
         self.current_username = current_username  # Store the current_username
         self.root.geometry("800x600")
@@ -34,7 +35,8 @@ class OwnedStocksManager:
             user = User.get_user_by_id(current_user_id)
             if user:
                 # Pass the current user ID to the home method
-                self.home(current_user_id)
+                self.homeroot.deiconify()
+                self.root.destroy()
             else:
                 print("Error: User not found.")
         except FileNotFoundError:

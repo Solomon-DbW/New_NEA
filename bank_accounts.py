@@ -23,12 +23,14 @@ class BankAccountManager:
             with open("user_id.txt", "r") as f:
                 lines = f.readlines()
                 current_user_id = int(lines[0].strip())
-                current_username = lines[1].strip()
+                # current_username = lines[1].strip()
                 
             user = User.get_user_by_id(current_user_id)
             if user:
+                self.homeroot.deiconify()
                 self.root.destroy()
-                self.home(current_username)
+                # self.home(current_username)
+                return
             else:
                 print("Error: User not found.")
         except Exception as e:
