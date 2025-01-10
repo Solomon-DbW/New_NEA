@@ -67,6 +67,13 @@ def home(current_user_id):
     )
     owned_stocks_button.pack(pady=10)
 
+    exit_button = ctk.CTkButton(
+        root, 
+        text="Exit", 
+        command=root.destroy
+    )
+    exit_button.pack(pady=10)
+
     root.mainloop()
 
 

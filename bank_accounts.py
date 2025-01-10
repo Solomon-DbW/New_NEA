@@ -11,6 +11,7 @@ class BankAccountManager:
     def __init__(self, home, homeroot, current_username):
         self.root = ctk.CTk()
         self.homeroot = homeroot
+        homeroot.withdraw()
         self.home = home
         self.current_username = current_username  # Store the current_username
         self.root.geometry("800x600")
@@ -20,11 +21,14 @@ class BankAccountManager:
     def return_home(self):
         try:
             with open("user_id.txt", "r") as f:
-                current_user_id = int(f.readline().strip())
+                lines = f.readlines()
+                current_user_id = int(lines[0].strip())
+                current_username = lines[1].strip()
                 
             user = User.get_user_by_id(current_user_id)
             if user:
-                self.home(current_user_id)
+                self.root.destroy()
+                self.home(current_username)
             else:
                 print("Error: User not found.")
         except Exception as e:
