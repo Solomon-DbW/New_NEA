@@ -9,7 +9,12 @@ def login(home, welcome):
     root = ctk.CTk()
     WIDTH = 400
     HEIGHT = 400
+
+    # WIDTH = root.winfo_screenwidth() - 100
+    # HEIGHT = root.winfo_screenheight() - 100
     root.geometry(f"{WIDTH}x{HEIGHT}")
+
+    # root.attributes("-fullscreen", True)
 
     # Entry Box For Username
     username_entry = ctk.CTkEntry(root, placeholder_text="Enter your username: ")
@@ -17,12 +22,12 @@ def login(home, welcome):
     
     # Enrty Box For Password
     password_entry = ctk.CTkEntry(root, placeholder_text="Enter your password: ", show="*")
-    password_entry.place(relx=0.5, rely=0.2, anchor=ctk.CENTER)
+    password_entry.place(relx=0.5, rely=0.3, anchor=ctk.CENTER)
 
     # Show Password Option Functionality
     show_password = ctk.BooleanVar()
     show_password_check = ctk.CTkCheckBox(root, text="Show password", variable=show_password, command=lambda: password_entry.configure(show="" if show_password.get() else "*"))
-    show_password_check.place(relx=0.5, rely=0.3, anchor=ctk.CENTER)
+    show_password_check.place(relx=0.5, rely=0.4, anchor=ctk.CENTER)
 
     # Function To Submit Signup Details
     def submit_login():
@@ -61,12 +66,13 @@ def login(home, welcome):
         welcome()
 
     # Login Page Buttons Configuration
-    back_button = ctk.CTkButton(root, text="Back", command=lambda:return_to_welcome())
-    back_button.place(relx=0.5, rely=0.4, anchor=ctk.CENTER)
 
     login_button = ctk.CTkButton(root, text="Log in", command=submit_login)
-    login_button.place(relx=0.5, rely=0.35, anchor=ctk.CENTER)
+    login_button.place(relx=0.5, rely=0.6, anchor=ctk.CENTER)
     
+    back_button = ctk.CTkButton(root, text="Back", command=lambda:return_to_welcome())
+    back_button.place(relx=0.5, rely=0.8, anchor=ctk.CENTER)
+
     root.mainloop()
 
 

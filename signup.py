@@ -18,7 +18,7 @@ def signup(home,welcome):
 
     # Entry Box For Password
     password_entry = ctk.CTkEntry(root, placeholder_text="Create your password ", show="*")
-    password_entry.place(relx=0.5, rely=0.2, anchor=ctk.CENTER)
+    password_entry.place(relx=0.5, rely=0.3, anchor=ctk.CENTER)
 
     # Show Password Option Functionality
     show_password = ctk.BooleanVar()
@@ -28,7 +28,7 @@ def signup(home,welcome):
         variable=show_password, 
         command=lambda: password_entry.configure(show="" if show_password.get() else "*")
     )
-    show_password_check.place(relx=0.5, rely=0.3, anchor=ctk.CENTER)
+    show_password_check.place(relx=0.5, rely=0.4, anchor=ctk.CENTER)
 
     # Function To Submit Signup Details
     def submit_signup():
@@ -80,9 +80,9 @@ def signup(home,welcome):
 
     # Signup Page Buttons Configuration
     signup_button = ctk.CTkButton(root, text="Sign up", command=submit_signup)
-    signup_button.place(relx=0.5, rely=0.35, anchor=ctk.CENTER)
+    signup_button.place(relx=0.5, rely=0.6, anchor=ctk.CENTER)
 
     return_to_welcome_button = ctk.CTkButton(root, text="Return to welcome", command=lambda: return_to_welcome())
-    return_to_welcome_button.place(relx=0.5, rely=0.4, anchor=ctk.CENTER)
+    return_to_welcome_button.place(relx=0.5, rely=0.8, anchor=ctk.CENTER)
     
     root.mainloop()
