@@ -21,16 +21,13 @@ class BankAccountManager:
     def return_home(self):
         try:
             with open("user_id.txt", "r") as f:
-                lines = f.readlines()
-                current_user_id = int(lines[0].strip())
-                # current_username = lines[1].strip()
+                current_user_id = int(f.readline().strip())
                 
             user = User.get_user_by_id(current_user_id)
             if user:
+                # self.home(current_user_id)
                 self.homeroot.deiconify()
                 self.root.destroy()
-                # self.home(current_username)
-                return
             else:
                 print("Error: User not found.")
         except Exception as e:
@@ -100,16 +97,13 @@ class BankAccountManager:
 
             accounts = session.query(Card).join(User).all()
             
-            # if not accounts:
-            # if len(accounts) == 0:
-            #     no_cards_label = ctk.CTkLabel(self.cards_frame, text="No cards found", font=("Arial", 14))
-            #     no_cards_label.pack(pady=20)
-            #     return
+            if not accounts:
+                no_cards_label = ctk.CTkLabel(self.cards_frame, text="No cards found", font=("Arial", 14))
+                no_cards_label.pack(pady=20)
+                return
 
             with open("user_id.txt", "r") as f:
                 current_user_id = f.readline().strip()
-
-            accounts_count = 0
 
             for account in accounts:
                 account_data = (
@@ -121,13 +115,9 @@ class BankAccountManager:
                     account.card_type
                 )
                 
+                # if account.userid == User.get_user_id(self.current_username):
                 if str(account.userid) == current_user_id:
-                    accounts_count += 1
                     self.create_card_frame(self.cards_frame, account_data)
-
-            if accounts_count == 0:
-                no_cards_label = ctk.CTkLabel(self.cards_frame, text="No cards found", font=("Arial", 14))
-                no_cards_label.pack(pady=20)
 
 
 
