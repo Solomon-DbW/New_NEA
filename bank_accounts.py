@@ -2,7 +2,8 @@ import customtkinter as ctk
 import tkinter as tk
 from tkinter import messagebox
 import re
-from datetime import datetime
+# from datetime import datetime
+import datetime
 from database_manager import Card, User, session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -183,10 +184,15 @@ class BankAccountManager:
         return checksum % 10 == 0
 
     def validate_expiration_date(self, exp_date: str) -> bool:
+        # exp_date_check = exp_date.split("/")
+        # today_date = datetime.date.today().strftime("%d-%m-%Y").split("-")
+        # if int(exp_date_check[1]) < int(today_date[2]) or (int(exp_date_check[0]) < int(today_date[1])):
+        #     return False
+
         if not re.match(r"^(0[1-9]|1[0-2])/([0-9]{2})$", exp_date):
             return False
         month, year = map(int, exp_date.split("/"))
-        return datetime(2000 + year, month, 1) > datetime.now()
+        return datetime.datetime(2000 + year, month, 1) > datetime.datetime.now()
 
     def validate_cvv(self, cvv: str) -> bool:
         return cvv.isdigit() and len(cvv) in (3, 4) and (self.card_type_var.get() == "American Express" and len(cvv) == 4 or len(cvv) == 3)

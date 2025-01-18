@@ -52,14 +52,17 @@ def signup(home,welcome):
         # Checks If Username Is Already Taken In The Database
         existing_user = session.query(User).filter_by(username=username).first()
         if existing_user:
-            ctk.CTkLabel(root, text="Username already taken.").place(relx=0.5, rely=0.4, anchor=ctk.CENTER)
+            ctk.CTkLabel(root, text="Username already taken.").place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
+            return
+        elif username == "DROP TABLE IF EXISTS users" or password_entry.get() == "DROP TABLE IF EXISTS users":  # Prevents SQL Injection
+            ctk.CTkLabel(root, text="Nice try buddy.").place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
             return
         else:
             # Saves User Credentials In Database
             user = User(username, password)
             session.add(user)
             session.commit()
-            ctk.CTkLabel(root, text="Signup successful!").place(relx=0.5, rely=0.4, anchor=ctk.CENTER)
+            ctk.CTkLabel(root, text="Signup successful!").place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
         
             current_user_id = user.userid # Gets The Current User's ID
 

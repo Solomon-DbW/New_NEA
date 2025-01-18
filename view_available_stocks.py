@@ -1,12 +1,12 @@
 import os
-from icecream import ic
+from datetime import datetime
 import customtkinter as ctk
-import tkinter as tk
 from tkinter import messagebox
 from price_predictor import StockPricePredictor 
 import threading
-
-import price_predictor
+import yfinance as yf
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 def view_available_stocks_predictions(StockButton, logger, homeroot, home):
     homeroot.destroy()
@@ -39,9 +39,6 @@ def view_available_stocks_predictions(StockButton, logger, homeroot, home):
         ("GE", "General Electric Company")
     ]
 
-
-                         
-
     def process_stock(ticker, results_frame):
         try:
             stock_frame = ctk.CTkFrame(results_frame)
@@ -54,44 +51,49 @@ def view_available_stocks_predictions(StockButton, logger, homeroot, home):
 
             status_label.configure(text=f"Training new model for {ticker}...")
             if predictor.fetch_data():
-                print(predictor.data.head())
-
+                # print(predictor.data.head())
                 predictor.prepare_data()
                 predictor.build_model()
-                # predictor.build_or_load_model("Models/WMT_model.keras")
-                history = predictor.train_model(epochs=10, batch_size=32)
-
-                # Ensure the Models directory exists
-                if not os.path.exists("Models"):
-                    os.makedirs("Models")
-
-                # predictor.save_model(model_path)  # Save the newly trained model
-            else:
-                raise Exception(f"Failed to fetch data for {ticker}")
 
             # Predict next day's price
             result = predictor.predict_next_day()
             if result:
                 next_price, price_change, percentage_change = result
-                # next_price, price_change, percentage_change = (
-                #     next_price.item(),
-                #     price_change.item(),
-                #     percentage_change.item(),
-                # )
+                stock = yf.Ticker(ticker)
+                market_cap = stock.info['marketCap']
+                current_price = stock.info['currentPrice']
+                num_shares = market_cap / current_price
+                
+                price_history = stock.history(period="1y")['Close']
 
-                #ic(next_price)
-                #ic(price_change)
-                #ic(percentage_change)
+                # Display graph of historical prices
+                fig, ax = plt.subplots()
+                ax.plot(price_history, label='Historical Prices')
+                ax.plot(price_history.index[-1], next_price, 'ro', label='Predicted Price')
+                ax.set_title(f"{ticker} Historical Prices and Prediction")
+                ax.set_xlabel("Date")
+                ax.set_ylabel("Price")
+                ax.legend()
 
-                status_label.configure(text=f"Predicted Price: £{float(next_price):.2f} \n"
+                canvas = FigureCanvasTkAgg(fig, master=stock_frame)
+                canvas.draw()
+                canvas.get_tk_widget().pack()
+
+                status_label.configure(text=f"Current Price: £{float(current_price):.2f} \n"
+                                       f"Predicted Price: £{float(next_price):.2f} \n"
                                        f"Change in price: £{float(price_change):.2f} \n"
-                                       f"Percentage change: {float(percentage_change):.2f}%")
+                                       f"Percentage change: {float(percentage_change):.2f}% \n"
+                                       f"Number of available shares: {num_shares:.2f}")
+                                       # f"Number of available shares: {get_number_of_available_shares(ticker)}")
 
 
                 messagebox.showinfo(f"Prediction for {ticker} completed",
                                     f"""Predicted Price: £{float(next_price):.2f} 
 Change in price: £{float(price_change):.2f}
 Percentage change: {float(percentage_change):.2f}%""")
+
+            elif predictor.fetch_data() == False:
+                raise Exception(f"Failed to fetch data for {ticker}")
 
             else:
                 print("Prediction failed")

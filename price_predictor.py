@@ -49,8 +49,6 @@ class StockPricePredictor:
         """
         try:
             self.data = yf.download(self.stock_symbol, start=start_date, end=datetime.now())
-            #ic(self.data)
-            #ic(self.stock_symbol)
             if self.data.empty:
                 print(f"No data fetched for {self.stock_symbol}")
                 return False

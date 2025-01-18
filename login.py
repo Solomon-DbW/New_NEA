@@ -36,6 +36,10 @@ def login(home, welcome):
         username = username_entry.get()
         password = password_entry.get()
 
+        if username == "DROP TABLE IF EXISTS users" or password_entry.get() == "DROP TABLE IF EXISTS users":  # Prevents SQL Injection
+            ctk.CTkLabel(root, text="Nice try buddy.").place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
+            return
+
         # Searches Database For User With Same Username As Inputted Username
         user = session.query(User).filter_by(username=username).first()
         if user:
