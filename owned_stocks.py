@@ -46,6 +46,15 @@ class OwnedStocksManager:
         except Exception as e:
             print(f"Unexpected error: {e}")
 
+    # def get_owned_stock_by_user_id_and_ticker(self, user_id: int, stock_ticker: str):
+    #     try:
+    #         stock = session.query(OwnedStock).filter_by(userid=user_id, stock_ticker=stock_ticker).first()
+    #         return stock
+    #     except SQLAlchemyError as e:
+    #         print(f"Error fetching owned stock: {str(e)}")
+    #         return None
+
+
     def add_owned_stock(self):
         try:
             username = self.username_entry.get().strip()

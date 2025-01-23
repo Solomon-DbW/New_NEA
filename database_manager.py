@@ -213,6 +213,24 @@ class OwnedStock(Base):
             print(f"Error deleting stock:{str(e)}")
             return False
 
+    @staticmethod
+    def get_owned_stock_by_user_id_and_ticker(user_id: int, ticker: str):
+        try:
+            stock = session.query(OwnedStock).filter_by(userid=user_id, stock_ticker=ticker).first()
+            return stock
+        except SQLAlchemyError as e:
+            print(f"Error retrieving stock: {str(e)}")
+            return None
+
+    @staticmethod
+    def get_owned_stock_price_by_user_id_and_ticker(user_id: int, ticker: str):
+        try:
+            stock = session.query(OwnedStock).filter_by(userid=user_id, stock_ticker=ticker).first()
+            return stock.amount_invested
+        except SQLAlchemyError as e:
+            print(f"Error retrieving stock price: {str(e)}")
+            return None
+
 
 
 # Create all tables
