@@ -1,13 +1,13 @@
 import os
-from database_manager import OwnedStock, User, session
 from datetime import datetime
 import customtkinter as ctk
 from tkinter import messagebox
-from price_predictor import StockPricePredictor  # Updated import
+from price_predictor import StockPricePredictor 
 import threading
 import yfinance as yf
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import icecream as ic
 
 def view_available_stocks_predictions(StockButton, logger, homeroot, home):
     homeroot.destroy()
@@ -50,116 +50,56 @@ def view_available_stocks_predictions(StockButton, logger, homeroot, home):
 
             predictor = StockPricePredictor(ticker)
 
-            # Fetch and prepare data
-            status_label.configure(text=f"Fetching and preparing data for {ticker}...")
+            status_label.configure(text=f"Training new model for {ticker}...")
             if predictor.fetch_data():
+                # print(predictor.data.head())
                 predictor.prepare_data()
+                predictor.build_model()
 
-                # Build or load the model
-                model_path = f"{ticker}_model"  # No extension here
-                if not predictor.load_model(model_path):
-                    status_label.configure(text=f"Training new model for {ticker}...")
-                    predictor.build_model()
-                    predictor.train_model(epochs=50, batch_size=32)
-                    predictor.save_model(model_path)  # No extension here
+            # Predict next day's price
+            result = predictor.predict_next_day()
+            if result:
+                next_price, price_change, percentage_change = result
+                stock = yf.Ticker(ticker)
+                market_cap = stock.info['marketCap']
 
-                # Predict next day's price
-                result = predictor.predict_next_day()
-                if result:
-                    next_price, price_change, percentage_change = result
-                    stock = yf.Ticker(ticker)
-                    market_cap = stock.info['marketCap']
-                    current_price = stock.info['currentPrice']
-                    num_shares = market_cap / current_price
+                current_price = stock.history(period="1d")['Close'].iloc[-1]
+                num_shares = market_cap / current_price
+                
+                price_history = stock.history(period="1y")['Close']
 
-                    # Display graph of historical prices and predictions
-                    fig, ax = plt.subplots()
-                    price_history = stock.history(period="1y")['Close']
-                    ax.plot(price_history, label='Historical Prices')
-                    ax.plot(price_history.index[-1], next_price, 'ro', label='Predicted Price')
-                    ax.set_title(f"{ticker} Historical Prices and Prediction")
-                    ax.set_xlabel("Date")
-                    ax.set_ylabel("Price")
-                    ax.legend()
+                # Display graph of historical prices
+                fig, ax = plt.subplots()
+                ax.plot(price_history, label='Historical Prices')
+                ax.plot(price_history.index[-1], next_price, 'ro', label='Predicted Price')
+                plt.xticks = (0,80)
+                ax.set_title(f"{ticker} Historical Prices and Prediction")
+                ax.set_xlabel("Date")
+                ax.set_ylabel("Price")
+                ax.legend()
 
-                    canvas = FigureCanvasTkAgg(fig, master=stock_frame)
-                    canvas.draw()
-                    canvas.get_tk_widget().pack()
+                canvas = FigureCanvasTkAgg(fig, master=stock_frame)
+                canvas.draw()
+                canvas.get_tk_widget().pack()
 
-                    status_label.configure(text=f"Current Price: £{float(current_price):.2f} \n"
-                                               f"Predicted Price: £{float(next_price):.2f} \n"
-                                               f"Change in price: £{float(price_change):.2f} \n"
-                                               f"Percentage change: {float(percentage_change):.2f}% \n"
-                                               f"Number of available shares: {num_shares:.2f}")
+                status_label.configure(text=f"Current Price: £{float(current_price):.2f} \n"
+                                       f"Predicted Price: £{float(next_price):.2f} \n"
+                                       f"Change in price: £{float(price_change.iloc[0]):.2f} \n"
+                                       f"Percentage change: {float(percentage_change.iloc[0]):.2f}% \n"
+                                       f"Number of available shares: {num_shares:.2f}")
+                                       # f"Number of available shares: {get_number_of_available_shares(ticker)}")
 
-                    # Evaluate the model
-                    evaluation_results = predictor.evaluate_model()
-                    if evaluation_results:
-                        fig_eval, ax_eval = plt.subplots()
-                        ax_eval.plot(evaluation_results['actual_values'], label='Actual Prices', color='blue')
-                        ax_eval.plot(evaluation_results['predictions'], label='Predicted Prices', color='red')
-                        ax_eval.set_title(f"{ticker} Model Evaluation")
-                        ax_eval.set_xlabel("Time (Days)")
-                        ax_eval.set_ylabel("Price")
-                        ax_eval.legend()
 
-                        canvas_eval = FigureCanvasTkAgg(fig_eval, master=stock_frame)
-                        canvas_eval.draw()
-                        canvas_eval.get_tk_widget().pack()
+                messagebox.showinfo(f"Prediction for {ticker} completed",
+                                    f"""Predicted Price: £{float(next_price):.2f} 
+Change in price: £{float(price_change.iloc[0]):.2f}
+Percentage change: {float(percentage_change.iloc[0]):.2f}%""")
 
-                        status_label.configure(text=status_label.cget("text") + f"\nModel Evaluation:\n"
-                                                                               f"MSE: {evaluation_results['mse']:.2f}\n"
-                                                                               f"RMSE: {evaluation_results['rmse']:.2f}\n"
-                                                                               f"MAE: {evaluation_results['mae']:.2f}")
-
-                    # Check if the user owns the stock and provide recommendations
-                    with open("user_id.txt", "r") as f:
-                        current_user_id = int(f.readline().strip())
-                    user = User.get_user_by_id(current_user_id)
-                    if user:
-                        owned_stock = OwnedStock.get_owned_stock_price_by_user_id_and_ticker(current_user_id, ticker)
-                        if owned_stock is not None:  # Check if the user owns the stock
-                            owned_stock_price = owned_stock.amount_invested  # Access the attribute only if owned_stock is not None
-
-                            if owned_stock_price > next_price:
-                                messagebox.showinfo(f"Prediction for {ticker} completed",
-                                                   f"""Predicted Price: £{float(next_price):.2f} 
-    Change in price: £{float(price_change):.2f}
-    Percentage change: {float(percentage_change):.2f}%
-    Number of available shares: {num_shares:.2f}
-    Current Price: £{float(current_price):.2f}
-    You should sell your shares now!""")
-
-                            elif owned_stock_price < next_price:
-                                messagebox.showinfo(f"Prediction for {ticker} completed",
-                                                   f"""Predicted Price: £{float(next_price):.2f}
-    Change in price: £{float(price_change):.2f}
-    Percentage change: {float(percentage_change):.2f}%
-    Number of available shares: {num_shares:.2f}
-    Current Price: £{float(current_price):.2f}
-    You should buy more shares now!""")
-                            else:
-                                messagebox.showinfo(f"Prediction for {ticker} completed",
-                                                   f"""Predicted Price: £{float(next_price):.2f}
-    Change in price: £{float(price_change):.2f}
-    Percentage change: {float(percentage_change):.2f}%
-    Number of available shares: {num_shares:.2f}
-    Current Price: £{float(current_price):.2f}
-    You should hold your shares for now!""")
-                        else:
-                            messagebox.showinfo(f"Prediction for {ticker} completed",
-                                               f"""Predicted Price: £{float(next_price):.2f}
-    Change in price: £{float(price_change):.2f}
-    Percentage change: {float(percentage_change):.2f}%
-    Number of available shares: {num_shares:.2f}
-    Current Price: £{float(current_price):.2f}
-    You do not own any shares of {ticker}.""")
-
-                else:
-                    raise Exception(f"Failed to predict price for {ticker}")
+            elif predictor.fetch_data() == False:
+                raise Exception(f"Failed to fetch data for {ticker}")
 
             else:
-                raise Exception(f"Failed to fetch data for {ticker}")
+                print("Prediction failed")
 
         except Exception as e:
             logger.error(f"Error processing {ticker}: {str(e)}")
@@ -181,6 +121,7 @@ def view_available_stocks_predictions(StockButton, logger, homeroot, home):
     def return_home(home):
         with open("user_id.txt", "r") as f:
             lines = f.readlines()
+            # current_user_id = lines[0].strip()
             current_username = lines[1].strip()
 
         root.destroy()
@@ -219,3 +160,4 @@ def view_available_stocks_predictions(StockButton, logger, homeroot, home):
     results_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
     root.mainloop()
+

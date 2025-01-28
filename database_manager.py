@@ -226,7 +226,9 @@ class OwnedStock(Base):
     def get_owned_stock_price_by_user_id_and_ticker(user_id: int, ticker: str):
         try:
             stock = session.query(OwnedStock).filter_by(userid=user_id, stock_ticker=ticker).first()
-            return stock.amount_invested
+            if stock is not None:
+                return stock.amount_invested
+            return None
         except SQLAlchemyError as e:
             print(f"Error retrieving stock price: {str(e)}")
             return None
