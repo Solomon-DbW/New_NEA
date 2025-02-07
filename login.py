@@ -7,14 +7,11 @@ def login(home, welcome):
 
     # GUI Setup
     root = ctk.CTk()
+
     WIDTH = 400
     HEIGHT = 400
 
-    # WIDTH = root.winfo_screenwidth() - 100
-    # HEIGHT = root.winfo_screenheight() - 100
     root.geometry(f"{WIDTH}x{HEIGHT}")
-
-    # root.attributes("-fullscreen", True)
 
     # Entry Box For Username
     username_entry = ctk.CTkEntry(root, placeholder_text="Enter your username: ")

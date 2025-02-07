@@ -81,7 +81,7 @@ session = Session()
 class Base(DeclarativeBase):
     pass
 
-# User model
+# User table model
 class User(Base):
     __tablename__ = "users"
     userid = Column(Integer, primary_key=True, autoincrement=True)
@@ -91,26 +91,26 @@ class User(Base):
     # Relationship to cards
     cards = relationship("Card", backref="user", cascade="all, delete-orphan")
     
-    def __init__(self, username, password):
+    def __init__(self, username, password): # Constructor
         self.username = username
         self.password = password
 
     @staticmethod
-    def get_username(user_id: int):
+    def get_username(user_id: int): # Static method to get username by user ID
         """Retrieve username by user ID."""
         try:
-            user = session.query(User).filter_by(userid=user_id).first()
+            user = session.query(User).filter_by(userid=user_id).first() # Query the user by user ID
             return user.username if user else None
         except SQLAlchemyError as e:
             print(f"Error retrieving username: {str(e)}")
             return None
 
 
-    def get_user_id(self):
+    def get_user_id(self): # Method to get user ID
         return self.userid
 
     @staticmethod
-    def get_user_by_username(username: str):
+    def get_user_by_username(username: str): # Static method to get user by username
         """
         Retrieve a user by their username.
         Returns None if user not found or if there's an error.
@@ -123,7 +123,7 @@ class User(Base):
             return None
 
     @staticmethod
-    def get_user_by_id(user_id: int):
+    def get_user_by_id(user_id: int): # Static method to get user by user ID 
         """Retrieve a user by their ID. Returns None if user not found or if there's an error."""
         try:
             user = session.query(User).filter_by(userid=user_id).first()
@@ -132,7 +132,7 @@ class User(Base):
             print(f"Error retrieving user by ID: {str(e)}")
             return None
 
-# Card model
+# Card table model
 class Card(Base):
     __tablename__ = "cards"
     cardid = Column(Integer, primary_key=True, autoincrement=True)
@@ -143,7 +143,7 @@ class Card(Base):
     card_type = Column(String)
     cvv_code = Column(String)
     
-    def __init__(self, userid, card_holder_name, card_number, expiration_date, card_type, cvv_code):
+    def __init__(self, userid, card_holder_name, card_number, expiration_date, card_type, cvv_code): # Constructor
         self.userid = userid
         self.card_holder_name = card_holder_name
         self.card_number = card_number
@@ -151,10 +151,10 @@ class Card(Base):
         self.card_type = card_type
         self.cvv_code = cvv_code
     
-    def __repr__(self):
+    def __repr__(self): # Representation of the card
         return f"Card(cardid={self.cardid}, userid={self.userid}, card_holder_name={self.card_holder_name})"
     
-    def save_card(self):
+    def save_card(self): # Method to save the card
         """Add this card to the session and commit."""
         try:
             session.add(self)
@@ -166,10 +166,10 @@ class Card(Base):
             return False
     
     @staticmethod
-    def delete_card(card_id: int) -> bool:
+    def delete_card(card_id: int) -> bool: # Static method to delete a card by ID
         """Delete a card by ID."""
         try:
-            card = session.query(Card).filter_by(cardid=card_id).first()
+            card = session.query(Card).filter_by(cardid=card_id).first() # Query the card by card ID
             if card:
                 session.delete(card)
                 session.commit()
@@ -180,7 +180,7 @@ class Card(Base):
             print(f"Error deleting card: {str(e)}")
             return False
 
-class OwnedStock(Base):
+class OwnedStock(Base): # Owned stocks table model
     __tablename__ = "Owned_Stocks_and_Investments"
     userid = Column(Integer, ForeignKey("users.userid", ondelete="CASCADE"))
     stockid = Column(Integer, primary_key=True, autoincrement=True, unique=True)
@@ -189,7 +189,7 @@ class OwnedStock(Base):
     amount_invested = Column(Float)
     number_of_shares = Column(Integer)
 
-    def save_stock(self):
+    def save_stock(self): # Method to save the stock
         try:
             session.add(self)
             session.commit()
@@ -200,7 +200,7 @@ class OwnedStock(Base):
             return False
 
     @staticmethod
-    def delete_stock(stock_id: int) -> bool:
+    def delete_stock(stock_id: int) -> bool: # Static method to delete a stock by ID
         try:
             stock = session.query(OwnedStock).filter_by(stockid=stock_id).first()
             if stock:
@@ -214,18 +214,18 @@ class OwnedStock(Base):
             return False
 
     @staticmethod
-    def get_owned_stock_by_user_id_and_ticker(user_id: int, ticker: str):
+    def get_owned_stock_by_user_id_and_ticker(user_id: int, ticker: str): # Static method to get owned stock by user ID and ticker
         try:
-            stock = session.query(OwnedStock).filter_by(userid=user_id, stock_ticker=ticker).first()
+            stock = session.query(OwnedStock).filter_by(userid=user_id, stock_ticker=ticker).first() # Query the stock by user ID and ticker
             return stock
         except SQLAlchemyError as e:
             print(f"Error retrieving stock: {str(e)}")
             return None
 
     @staticmethod
-    def get_owned_stock_price_by_user_id_and_ticker(user_id: int, ticker: str):
+    def get_owned_stock_price_by_user_id_and_ticker(user_id: int, ticker: str): # Static method to get owned stock price by user ID and ticker
         try:
-            stock = session.query(OwnedStock).filter_by(userid=user_id, stock_ticker=ticker).first()
+            stock = session.query(OwnedStock).filter_by(userid=user_id, stock_ticker=ticker).first() # Query the stock by user ID and ticker
             if stock is not None:
                 return stock.amount_invested
             return None

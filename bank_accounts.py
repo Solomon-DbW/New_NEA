@@ -8,7 +8,7 @@ from database_manager import Card, User, session
 from sqlalchemy.exc import SQLAlchemyError
 
 
-class BankAccountManager:
+class BankAccountManager: # Class to manage bank accounts
     def __init__(self, home, homeroot, current_username):
         self.root = ctk.CTk()
         self.homeroot = homeroot
@@ -19,14 +19,13 @@ class BankAccountManager:
         self.root.title("Manage Bank Cards")
         self.setup_gui()
 
-    def return_home(self):
+    def return_home(self): # Function to return to the home page
         try:
             with open("user_id.txt", "r") as f:
-                current_user_id = int(f.readline().strip())
+                current_user_id = int(f.readline().strip()) # Read the user_id from the file
                 
-            user = User.get_user_by_id(current_user_id)
-            if user:
-                # self.home(current_user_id)
+            user = User.get_user_by_id(current_user_id) # Get the user by the user_id
+            if user: # Return home if the user is found
                 self.homeroot.deiconify()
                 self.root.destroy()
             else:
@@ -35,35 +34,35 @@ class BankAccountManager:
             print(f"Error in return_home: {e}")
 
 
-    def setup_gui(self):
-        self.notebook = ctk.CTkTabview(self.root)
-        self.notebook.pack(padx=20, pady=20, fill="both", expand=True)
+    def setup_gui(self): # Function to setup the GUI
+        self.notebook = ctk.CTkTabview(self.root) # Create a tab view
+        self.notebook.pack(padx=20, pady=20, fill="both", expand=True) # Pack the tab view
 
-        self.notebook.add("View Cards")
-        self.notebook.add("Add Card")
+        self.notebook.add("View Cards") # Add a tab for viewing cards
+        self.notebook.add("Add Card") # Add a tab for adding cards
 
-        view_frame = self.notebook.tab("View Cards")
-        view_button = ctk.CTkButton(view_frame, text="Refresh Bank Cards", command=self.view_all_bank_accounts)
-        view_button.pack(pady=10)
+        view_frame = self.notebook.tab("View Cards") # Create a frame for the view cards tab
+        view_button = ctk.CTkButton(view_frame, text="Refresh Bank Cards", command=self.view_all_bank_accounts) # Create a button to refresh the bank cards
+        view_button.pack(pady=10) # Pack the button
 
-        self.cards_frame = ctk.CTkScrollableFrame(view_frame, height=400)
-        self.cards_frame.pack(pady=10, fill="both", expand=True)
+        self.cards_frame = ctk.CTkScrollableFrame(view_frame, height=400) # Create a scrollable frame for the cards
+        self.cards_frame.pack(pady=10, fill="both", expand=True) # Pack the scrollable frame
 
-        add_frame = self.notebook.tab("Add Card")
-        self.setup_add_card_form(add_frame)
+        add_frame = self.notebook.tab("Add Card") # Create a frame for the add card tab
+        self.setup_add_card_form(add_frame) # Setup the add card form
 
-        home_button = ctk.CTkButton(view_frame, command=self.return_home, text="Return Home")
-        home_button.pack()
+        home_button = ctk.CTkButton(view_frame, command=self.return_home, text="Return Home") # Create a button to return home
+        home_button.pack() # Pack the button
 
-    def delete_card(self, card_id: int):
-        if messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this card?"):
+    def delete_card(self, card_id: int): # Function to delete a card
+        if messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this card?"): 
             if Card.delete_card(card_id):
                 messagebox.showinfo("Success", "Card deleted successfully!")
-                self.view_all_bank_accounts()
+                self.view_all_bank_accounts() # Refresh the bank cards
             else:
                 messagebox.showerror("Error", "Failed to delete card")
 
-    def create_card_frame(self, parent, account_data):
+    def create_card_frame(self, parent, account_data): # Function to create a card frame
         card_frame = ctk.CTkFrame(parent)
         card_frame.pack(pady=5, fill="x", expand=True)
 
@@ -91,12 +90,12 @@ class BankAccountManager:
         )
         delete_btn.pack(side="right", padx=10)
 
-    def view_all_bank_accounts(self):
+    def view_all_bank_accounts(self): # Function to view all bank accounts
         try:
             for widget in self.cards_frame.winfo_children():
-                widget.destroy()
+                widget.destroy() # Destroy all the widgets in the cards frame
 
-            accounts = session.query(Card).join(User).all()
+            accounts = session.query(Card).join(User).all() # Get all the accounts
             
             if not accounts:
                 no_cards_label = ctk.CTkLabel(self.cards_frame, text="No cards found", font=("Arial", 14))
@@ -125,7 +124,7 @@ class BankAccountManager:
         except SQLAlchemyError as e:
             messagebox.showerror("Database Error", f"Failed to retrieve accounts: {str(e)}")
 
-    def setup_add_card_form(self, parent):
+    def setup_add_card_form(self, parent): # Function to setup the add card form
         form_frame = ctk.CTkFrame(parent)
         form_frame.pack(pady=20, padx=20, fill="both", expand=True)
         
@@ -166,7 +165,7 @@ class BankAccountManager:
         clear_btn = ctk.CTkButton(form_frame, text="Clear Form", command=self.clear_form)
         clear_btn.pack(pady=(0, 20))
 
-    def clear_form(self):
+    def clear_form(self): # Function to clear the form
         self.username_entry.delete(0, tk.END)
         self.card_holder_entry.delete(0, tk.END)
         self.card_number_entry.delete(0, tk.END)
@@ -174,7 +173,7 @@ class BankAccountManager:
         self.cvv_entry.delete(0, tk.END)
         self.card_type_var.set("Visa Debit")
 
-    def validate_card_number(self, card_number: str) -> bool:
+    def validate_card_number(self, card_number: str) -> bool: # Function to validate the card number
         card_number = card_number.replace(" ", "").replace("-", "")
         if not (13 <= len(card_number) <= 19) or not card_number.isdigit():
             return False
@@ -183,21 +182,17 @@ class BankAccountManager:
         checksum = sum(d if i % 2 != len(digits) % 2 else d * 2 - 9 * (d * 2 > 9) for i, d in enumerate(digits))
         return checksum % 10 == 0
 
-    def validate_expiration_date(self, exp_date: str) -> bool:
-        # exp_date_check = exp_date.split("/")
-        # today_date = datetime.date.today().strftime("%d-%m-%Y").split("-")
-        # if int(exp_date_check[1]) < int(today_date[2]) or (int(exp_date_check[0]) < int(today_date[1])):
-        #     return False
+    def validate_expiration_date(self, exp_date: str) -> bool: # Function to validate the expiration date
 
         if not re.match(r"^(0[1-9]|1[0-2])/([0-9]{2})$", exp_date):
             return False
         month, year = map(int, exp_date.split("/"))
         return datetime.datetime(2000 + year, month, 1) > datetime.datetime.now()
 
-    def validate_cvv(self, cvv: str) -> bool:
+    def validate_cvv(self, cvv: str) -> bool: # Function to validate the CVV
         return cvv.isdigit() and len(cvv) in (3, 4) and (self.card_type_var.get() == "American Express" and len(cvv) == 4 or len(cvv) == 3)
 
-    def add_card(self):
+    def add_card(self): # Function to add a card
         username = self.username_entry.get().strip()
         card_holder = self.card_holder_entry.get().strip()
         card_number = self.card_number_entry.get().strip().replace(" ", "").replace("-", "")

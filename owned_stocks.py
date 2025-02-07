@@ -13,9 +13,9 @@ import pandas as pd
 root = ctk.CTk()
 root.title("Owned Stocks")
 
-class OwnedStocksManager:
+class OwnedStocksManager: # Class to manage owned stocks
 
-    def __init__(self, home, homeroot, current_username):
+    def __init__(self, home, homeroot, current_username): # Constructor
         self.root = ctk.CTk()
         self.homeroot = homeroot
         homeroot.withdraw()
@@ -25,7 +25,7 @@ class OwnedStocksManager:
         self.root.title("Manage Bank owned stocks")
         self.setup_gui()
 
-    def return_home(self):
+    def return_home(self): # Method to return to home screen
         try:
             # Read the current user ID from the file
             with open("user_id.txt", "r") as f:
@@ -46,16 +46,8 @@ class OwnedStocksManager:
         except Exception as e:
             print(f"Unexpected error: {e}")
 
-    # def get_owned_stock_by_user_id_and_ticker(self, user_id: int, stock_ticker: str):
-    #     try:
-    #         stock = session.query(OwnedStock).filter_by(userid=user_id, stock_ticker=stock_ticker).first()
-    #         return stock
-    #     except SQLAlchemyError as e:
-    #         print(f"Error fetching owned stock: {str(e)}")
-    #         return None
 
-
-    def add_owned_stock(self):
+    def add_owned_stock(self): # Method to add owned stock
         try:
             username = self.username_entry.get().strip()
             date_purchased = self.date_purchased_entry.get().strip()
@@ -67,12 +59,12 @@ class OwnedStocksManager:
                 messagebox.showerror("Error", "All fields are required")
                 return
 
-            user = User.get_user_by_username(username)
+            user = User.get_user_by_username(username) # Retrieve the user by username
             if user is None:
                 messagebox.showerror("Error", "User not found")
                 return
 
-            owned_stock = OwnedStock(
+            owned_stock = OwnedStock( # Create an instance of the OwnedStock class
                 userid=user.userid,
                 date_purchased=date_purchased,
                 stock_ticker=stock_ticker,
@@ -80,7 +72,7 @@ class OwnedStocksManager:
                 number_of_shares=number_of_shares
             )
 
-            if owned_stock.save_stock():
+            if owned_stock.save_stock(): # Save the owned stock
                 messagebox.showinfo("Success", "Owned stock added successfully!")
                 self.view_all_owned_stocks()
                 self.clear_form()
@@ -92,21 +84,21 @@ class OwnedStocksManager:
             messagebox.showerror("Error", f"Unexpected error: {e}")
 
 
-    def delete_owned_stock(self, stock_id: int):
+    def delete_owned_stock(self, stock_id: int): # Method to delete owned stock
         if messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this stock?"):
-            if OwnedStock.delete_stock(stock_id):
+            if OwnedStock.delete_stock(stock_id): # Delete the owned stock
                 messagebox.showinfo("Success", "Owned stock deleted successfully!")
                 self.view_all_owned_stocks()
             else:
                 messagebox.showerror("Error", "Failed to delete owned stock")
 
-    def create_owned_stock_frame(self, parent, stock_data):
-        owned_stock_frame = ctk.CTkFrame(parent)
+    def create_owned_stock_frame(self, parent, stock_data): # Method to create owned stock frame
+        owned_stock_frame = ctk.CTkFrame(parent) # Create a frame for the owned stock
         owned_stock_frame.pack(pady=5, fill="x", expand=True)
 
         stock_id, stock_ticker, date_purchased, amount_invested, number_of_shares, *_ = stock_data
 
-        info_frame = ctk.CTkFrame(owned_stock_frame)
+        info_frame = ctk.CTkFrame(owned_stock_frame) # Create a frame for the stock info
         info_frame.pack(side="left", padx=10, pady=5, fill="x", expand=True)
         
         # Fetch the current stock price
@@ -125,7 +117,6 @@ class OwnedStocksManager:
             f"Amount invested: £{amount_invested:.2f}",
             f"Number of shares: {number_of_shares}",
             f"Date of purchase: {date_purchased}",
-            # f"Current Price: £{float(current_price):.2f}",
             f"Current Investment Value: £{float(current_investment_value):.2f}",
             f"Gain/Loss: £{float(gain_loss):.2f} ({float(gain_loss_percentage):.2f}%)"
         ]
@@ -140,15 +131,14 @@ class OwnedStocksManager:
         delete_btn.pack(side="right", padx=10)
 
 
-    def clear_form(self):
+    def clear_form(self): # Method to clear form
         self.username_entry.delete(0, tk.END)
-        # self.stock_name_entry.delete(0, tk.END)
+        self.amount_invested_entry.delete(0, tk.END)
         self.date_purchased_entry.delete(0, tk.END)
-        # self.owned_stock_type_var.set("Visa Debit")
+        self.number_of_shares_entry.delete(0, tk.END)
 
-    def get_current_stock_price(self, stock_symbol: str):
+    def get_current_stock_price(self, stock_symbol: str): # Method to get current stock price
         try:
-            # data = yf.download(stock_symbol, period="1d")
             data = yf.Ticker(stock_symbol).history(period="1d")
             if not data.empty:
                 return data['Close'].iloc[0]
@@ -159,18 +149,18 @@ class OwnedStocksManager:
             print(f"Error fetching current stock price for {stock_symbol}: {e}")
             return None
 
-    def calculate_current_investment_value(self, stock_symbol: str, amount_invested: float):
+    def calculate_current_investment_value(self, stock_symbol: str, amount_invested: float): # Method to calculate current investment value
         current_price = self.get_current_stock_price(stock_symbol)
         if current_price is not None:
             return amount_invested * current_price
         return amount_invested
 
 
-    def setup_add_owned_stock_form(self, parent):
-        form_frame = ctk.CTkFrame(parent)
+    def setup_add_owned_stock_form(self, parent): # Method to setup add owned stock form
+        form_frame = ctk.CTkFrame(parent) # Create a frame for the form
         form_frame.pack(pady=20, padx=20, fill="both", expand=True)
 
-        ctk.CTkLabel(form_frame, text="Username:").pack(pady=(10, 0))
+        ctk.CTkLabel(form_frame, text="Username:").pack(pady=(10, 0)) # Create a label for the username
         self.username_entry = ctk.CTkEntry(form_frame)
         self.username_entry.pack(pady=(0, 10))
         self.username_entry.insert(0, "james_wilson")
@@ -225,26 +215,18 @@ class OwnedStocksManager:
         clear_btn.pack(pady=(0, 20))
        
 
-    def view_all_owned_stocks(self):
+    def view_all_owned_stocks(self): # Method to view all owned stocks
         try:
-            # progress = Progressbar(self.owned_stocks_frame, mode='indeterminate')
-            # progress.pack(pady=10)
-            # progress.start()
-
-            self.owned_stocks_frame.update_idletasks()
+            self.owned_stocks_frame.update_idletasks() # Update the owned stocks frame
 
             for widget in self.owned_stocks_frame.winfo_children():
-                widget.destroy()
+                widget.destroy() # Destroy all widgets in the owned stocks frame
 
             with open("user_id.txt", "r") as f:
                 current_user_id = f.readline().strip()
 
-            stocks = session.query(OwnedStock).filter_by(userid=current_user_id).all()
+            stocks = session.query(OwnedStock).filter_by(userid=current_user_id).all() # Query all owned stocks by user ID
 
-            # if not stocks:
-            #     no_owned_stocks_label = ctk.CTkLabel(self.owned_stocks_frame, text="No stocks found", font=("Arial", 14))
-            #     no_owned_stocks_label.pack(pady=20)
-            # else:
             stocks_count = 0
             for stock in stocks:
                 stock_data = (
@@ -254,7 +236,7 @@ class OwnedStocksManager:
                     stock.amount_invested,
                     stock.number_of_shares
                 )
-                self.create_owned_stock_frame(self.owned_stocks_frame, stock_data)
+                self.create_owned_stock_frame(self.owned_stocks_frame, stock_data) # Create a frame for the owned stock
                 stocks_count += 1
 
             if stocks_count == 0:
@@ -263,13 +245,10 @@ class OwnedStocksManager:
 
         except SQLAlchemyError as e:
             messagebox.showerror("Database Error", f"Failed to retrieve stocks: {str(e)}")
-        # finally:
-            # progress.stop()
-            # progress.destroy()
 
 
 
-    def remove_stock(self, stock_id: int):
+    def remove_stock(self, stock_id: int): # Method to remove stock
         if messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this stock?"):
             if OwnedStock.delete_stock(stock_id):
                 messagebox.showinfo("Success", "Stock deleted successfully!")
@@ -279,24 +258,24 @@ class OwnedStocksManager:
 
 
 
-    def setup_gui(self):
-        self.notebook = ctk.CTkTabview(self.root)
+    def setup_gui(self): # Method to setup GUI
+        self.notebook = ctk.CTkTabview(self.root) # Create a tab view for the notebook
         self.notebook.pack(padx=20, pady=20, fill="both", expand=True)
 
         self.notebook.add("View All Owned Stocks")
         self.notebook.add("Add Stocks")
 
         view_frame = self.notebook.tab("View All Owned Stocks")
-        view_button = ctk.CTkButton(view_frame, text="View/Refresh Owned Stocks", command=self.view_all_owned_stocks)
+        view_button = ctk.CTkButton(view_frame, text="View/Refresh Owned Stocks", command=self.view_all_owned_stocks) # Create a button to view/refresh owned stocks
         view_button.pack(pady=10)
 
-        self.owned_stocks_frame = ctk.CTkScrollableFrame(view_frame, height=400)
+        self.owned_stocks_frame = ctk.CTkScrollableFrame(view_frame, height=400) # Create a scrollable frame for the owned stocks
         self.owned_stocks_frame.pack(pady=10, fill="both", expand=True)
 
-        add_frame = self.notebook.tab("Add Stocks")
+        add_frame = self.notebook.tab("Add Stocks") # Create a tab for adding stocks
         self.setup_add_owned_stock_form(add_frame)
 
-        home_button = ctk.CTkButton(view_frame, command=self.return_home, text="Return Home")
+        home_button = ctk.CTkButton(view_frame, command=self.return_home, text="Return Home") # Create a button to return home
         home_button.pack()
 
 

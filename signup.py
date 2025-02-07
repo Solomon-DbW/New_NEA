@@ -46,7 +46,7 @@ def signup(home,welcome):
         engine = create_engine("sqlite:///users_and_details.db")
         Base.metadata.create_all(bind=engine)
 
-        Session = sessionmaker(bind=engine)
+        Session = sessionmaker(bind=engine) # Create a database  session
         session = Session()
 
         # Checks If Username Is Already Taken In The Database
@@ -88,7 +88,7 @@ def signup(home,welcome):
     signup_button = ctk.CTkButton(root, text="Sign up", command=submit_signup)
     signup_button.place(relx=0.5, rely=0.6, anchor=ctk.CENTER)
 
-    return_to_welcome_button = ctk.CTkButton(root, text="Return to welcome", command=lambda: return_to_welcome())
+    return_to_welcome_button = ctk.CTkButton(root, text="Return to welcome", command=lambda: return_to_welcome()) # Button to return to welcome page
     return_to_welcome_button.place(relx=0.5, rely=0.8, anchor=ctk.CENTER)
     
     root.mainloop()

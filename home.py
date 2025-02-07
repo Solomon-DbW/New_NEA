@@ -29,7 +29,7 @@ class StockButton(ctk.CTkButton):
         self.ticker = ticker
         self.company_name = company_name
 
-def home(current_user_id):
+def home(current_user_id): # Home screen
     import customtkinter as ctk  # Importing here to ensure the module is available
 
     root = ctk.CTk()
@@ -37,42 +37,42 @@ def home(current_user_id):
     root.geometry(f"{WIDTH}x{HEIGHT}")
     root.title("Stock Price Predictor")
     
-    view_available_stocks_button = ctk.CTkButton(
+    view_available_stocks_button = ctk.CTkButton( # Button to view available stocks
         root, 
         text="View available stocks", 
         command=lambda: view_available_stocks_predictions(
             StockButton, logger, homeroot=root, home=home
         )
     )
-    view_available_stocks_button.pack(pady=10)
+    view_available_stocks_button.pack(pady=10) # Pack the button
 
     user = User.get_user_by_id(current_user_id)
     current_username = user.username if user else "Unknown User"
 
-    bank_accounts_button = ctk.CTkButton(
+    bank_accounts_button = ctk.CTkButton( # Button to manage bank accounts
         root, 
         text="Manage bank accounts", 
         command=lambda: BankAccountManager(
             home=home, homeroot=root, current_username=current_username
         )
     )
-    bank_accounts_button.pack(pady=10)
+    bank_accounts_button.pack(pady=10) # Pack the button
 
-    owned_stocks_button = ctk.CTkButton(
+    owned_stocks_button = ctk.CTkButton( # Button to manage owned stocks
         root,
         text="Manage owned stocks",
         command=lambda: OwnedStocksManager(
             home=home, homeroot=root, current_username=current_username
         )
     )
-    owned_stocks_button.pack(pady=10)
+    owned_stocks_button.pack(pady=10) # Pack the button
 
-    exit_button = ctk.CTkButton(
+    exit_button = ctk.CTkButton( # Button to exit the application
         root, 
         text="Exit", 
         command=root.destroy
     )
-    exit_button.pack(pady=10)
+    exit_button.pack(pady=10) # Pack the button
 
     root.mainloop()
 
