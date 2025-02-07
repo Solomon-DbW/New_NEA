@@ -82,6 +82,7 @@ def view_available_stocks_predictions(StockButton, logger, homeroot, home):
                 canvas.draw()
                 canvas.get_tk_widget().pack()
 
+
                 status_label.configure(text=f"Current Price: £{float(current_price):.2f} \n"
                                        f"Predicted Price: £{float(next_price):.2f} \n"
                                        f"Change in price: £{float(price_change.iloc[0]):.2f} \n"

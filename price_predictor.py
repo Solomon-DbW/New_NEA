@@ -49,6 +49,9 @@ class StockPricePredictor:
         """
         try:
             self.data = yf.download(self.stock_symbol, start=start_date, end=datetime.now())
+            yesterday_close_price = self.data['Close'].iloc[-1]
+            ic(yesterday_close_price)
+            # print(self.data)
             if self.data.empty:
                 print(f"No data fetched for {self.stock_symbol}")
                 return False
@@ -102,8 +105,8 @@ class StockPricePredictor:
             Dense(units=1)
         ])
         
-        self.model.compile(optimizer=Adam(learning_rate=0.001),
-                         loss='mean_squared_error')
+        self.model.compile(optimizer='adam', loss='mean_squared_error')
+        self.model.fit(self.x_train, self.y_train, epochs=25, batch_size=32)
         
         print("Model built successfully!")
 
@@ -254,3 +257,6 @@ class StockPricePredictor:
 #     print(f"change: {price_change:.2f} ({percentage_change:.2f}%)")
 # else:
 #     print("No price increase expected within the specified future days.")
+
+model = StockPricePredictor(stock_symbol="AAPL")
+model.fetch_data()

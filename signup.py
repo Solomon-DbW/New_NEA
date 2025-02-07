@@ -62,6 +62,8 @@ def signup(home,welcome):
             user = User(username, password)
             session.add(user)
             session.commit()
+            session.refresh(user)
+            session.close()
             ctk.CTkLabel(root, text="Signup successful!").place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
         
             current_user_id = user.userid # Gets The Current User's ID
@@ -74,6 +76,7 @@ def signup(home,welcome):
 
         # Closes Database Connection
         session.close()
+        root.destroy()
         home(username) # Calls The Homepage
 
     # Function To Allow User To Return To Welcome Page
