@@ -1,4 +1,5 @@
 import os
+import keras
 from datetime import datetime
 import customtkinter as ctk
 from tkinter import messagebox
@@ -104,7 +105,6 @@ Percentage change: {float(percentage_change.iloc[0]):.2f}%""")
         except Exception as e:
             logger.error(f"Error processing {ticker}: {str(e)}")
             status_label.configure(text=f"Error: {str(e)}")
-
     def display_stock_prediction(ticker, company_name): # Function to display stock prediction
         for widget in results_frame.winfo_children():
             widget.destroy()
@@ -126,9 +126,32 @@ Percentage change: {float(percentage_change.iloc[0]):.2f}%""")
         root.destroy() # Destroy the current window
         home(current_username) # Call the home screen
 
+    # Add search bar to search for specific stocks
+    def search_stocks():
+        search_term = search_entry.get()
+        for widget in stock_scroll.winfo_children():
+            widget.destroy()
+        for ticker, company in AVAILABLE_STOCKS:
+            if search_term.upper() in ticker or search_term.lower() in company.lower():
+                button = ctk.CTkButton(
+                    stock_scroll,
+                    text=f"{ticker}\n{company}",
+                    command=lambda t=ticker, c=company: display_stock_prediction(t, c),
+                    font=("Arial", 14),
+                    height=60
+                )
+                button.pack(pady=2, padx=5, fill="x")
+
     left_panel = ctk.CTkFrame(root, width=300) # Create a frame for the left panel
     left_panel.pack(side="left", fill="y", padx=10, pady=10)
     left_panel.pack_propagate(False) # Prevent the frame from resizing
+
+    search_entry = ctk.CTkEntry(left_panel, placeholder_text="Search",font=("Arial", 14), width=500, height=20)
+    search_entry.pack(pady=10)
+
+    search_entry.bind("<Return>", search_stocks)
+
+
 
     return_home_button = ctk.CTkButton(left_panel, text="Return Home", command=lambda: return_home(home=home)) # Button to return to the home screen
     return_home_button.pack(pady=10)
@@ -145,6 +168,7 @@ Percentage change: {float(percentage_change.iloc[0]):.2f}%""")
             height=60
         )
         button.pack(pady=2, padx=5, fill="x")
+
 
     right_panel = ctk.CTkFrame(root) # Create a frame for the right panel
     right_panel.pack(side="right", fill="both", expand=True, padx=10, pady=10)

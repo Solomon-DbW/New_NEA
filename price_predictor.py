@@ -129,3 +129,20 @@ class StockPricePredictor: # Neural network to predict stock prices declared as 
             return actual_prediction, price_change, percentage_change # Return the prediction and changes
         except Exception as e: # Error handling
             print(f"Error predicting next day for {self.stock_symbol}: {e}")
+
+    def save_model(self, model_path): # Save the model
+        """Save the model to a file."""
+        if self.model is not None:
+            self.model.save(model_path)
+            print(f"Model saved to {model_path}")
+        else:
+            print("Model not available to save.")
+
+    @staticmethod
+    def load_model(model_path): # Load the model
+        """Load the model from a file."""
+        if os.path.exists(model_path):
+            return tensorflow.keras.models.load_model(model_path)
+        else:
+            print(f"Model file not found: {model_path}")
+            return None
