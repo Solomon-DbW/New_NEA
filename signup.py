@@ -36,6 +36,7 @@ def signup(home,welcome):
         # Gets Text From Entry Boxes
         username = username_entry.get()
         password = encrypt_password(password_entry.get())  # Encrypt password
+        print(f"Password = {password_entry.get()} | Encrypted password = {password}")
 
         # Checks If Username Or Password Is Empty When User Clicks Submit
         while len(username) == 0 or len(password_entry.get()) == 0:

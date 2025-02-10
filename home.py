@@ -41,7 +41,7 @@ def home(current_user_id): # Home screen
         root, 
         text="View available stocks", 
         command=lambda: view_available_stocks_predictions(
-            StockButton, logger, homeroot=root, home=home
+            StockButton, logger, homeroot=root, home=home 
         )
     )
     view_available_stocks_button.pack(pady=10) # Pack the button
